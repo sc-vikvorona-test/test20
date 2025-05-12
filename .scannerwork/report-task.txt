@@ -1,0 +1,7 @@
+organization=sc-vikvorona-test
+projectKey=sc-vikvorona-test_test20
+serverUrl=https://dev12.sc-dev12.io
+serverVersion=8.0.0.63177
+dashboardUrl=https://dev12.sc-dev12.io/dashboard?id=sc-vikvorona-test_test20
+ceTaskId=AZbExwvsZlXIxEG_bPsI
+ceTaskUrl=https://dev12.sc-dev12.io/api/ce/task?id=AZbExwvsZlXIxEG_bPsI

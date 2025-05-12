@@ -52,6 +52,8 @@ const operate = (operator, operand, pointer) => {
 };
 
 const test = `2,4,1,3,7,5,0,3,4,1,1,5,5,5,3,0`;
+const test = `2,4,1,3,7,5,0,3,4,1,1,5,5,5,3,0`;
+const test = `2,4,1,3,7,5,0,3,4,1,1,5,5,5,3,0`;
 
 const lol = `0,3,5,4,3,0`;
 
