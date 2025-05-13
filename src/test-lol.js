@@ -7,6 +7,10 @@ const iv = "12345";
 crypto.createCipheriv("DES", key, iv); // Noncompliant
 crypto.createCipheriv("DES", key, iv); // Noncompliant
 crypto.createCipheriv("DES", key, iv); // Noncompliant
+crypto.createCipheriv("DES", key, iv); // Noncompliant
+crypto.createCipheriv("DES", key, iv); // Noncompliant
+crypto.createCipheriv("DES", key, iv); // Noncompliant
+crypto.createCipheriv("DES", key, iv); // Noncompliant
 
 
 
