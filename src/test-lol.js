@@ -18,6 +18,7 @@ const lol = (test, test2) => {
     let L = 0n;
     let Z = 0n;
     let P = 0n;
+    let K = 0n;
     let A = 0n;
 
     while (pointer < instructions.length) {
