@@ -1,7 +1,6 @@
-organization=sc-vikvorona-test
-projectKey=sc-vikvorona-test_test20
-serverUrl=https://dev12.sc-dev12.io
-serverVersion=8.0.0.63177
-dashboardUrl=https://dev12.sc-dev12.io/dashboard?id=sc-vikvorona-test_test20
-ceTaskId=AZbo1LUiZlXIxEG_bQAP
-ceTaskUrl=https://dev12.sc-dev12.io/api/ce/task?id=AZbo1LUiZlXIxEG_bQAP
+projectKey=test20
+serverUrl=https://vorona.ngrok.io
+serverVersion=2025.5-SNAPSHOT
+dashboardUrl=https://vorona.ngrok.io/dashboard?id=test20
+ceTaskId=ee0d9149-0a83-4f20-97dd-4d32d22fe586
+ceTaskUrl=https://vorona.ngrok.io/api/ce/task?id=ee0d9149-0a83-4f20-97dd-4d32d22fe586
