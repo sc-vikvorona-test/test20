@@ -16,6 +16,7 @@ const lol = (test, test2) => {
     let S = 0n;
     let F = 0n;
     let L = 0n;
+    let Z = 0n;
     let A = 0n;
 
     while (pointer < instructions.length) {
