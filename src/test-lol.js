@@ -11,6 +11,10 @@ const lol = (test, test2) => {
     const instructions = test.split(",").map((x) => parseInt(x, 10));
     let B = 0n;
     let C = 0n;
+    let V = 0n;
+    let D = 0n;
+    let S = 0n;
+    let A = 0n;
 
     while (pointer < instructions.length) {
         const operator = instructions[pointer];
@@ -20,22 +24,6 @@ const lol = (test, test2) => {
     return res.map((x) => x.toString(16)).join("");
 }
 
-const test2 = (test, test2) => {
-    i = 0;
-    A += 1n;
-    count += 1;
-    if (count > 1000000) {
-        console.log("Too many iterations");
-    }
-    B = 0n;
-    C = 0n;
-    res = [];
-    }
-    const operator = instructions[pointer];
-    const operand = instructions[pointer + 1];
-    pointer = operate(operator, operand, pointer);
-    return pointer;
-}
 
 lol('1', 2)
 
