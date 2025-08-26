@@ -9,7 +9,6 @@ location.href = "javascript:void(0)"; // Sensitive
 const lol = (test, test2) => {
     let pointer = 0;
     const instructions = test.split(",").map((x) => parseInt(x, 10));
-    let A = BigInt(test2);
     let B = 0n;
     let C = 0n;
 
