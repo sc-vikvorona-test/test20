@@ -17,7 +17,7 @@ const lol = (test, test2, test3) => {
         const operand = instructions[pointer + 1];
         pointer = operate(operator, operand, pointer);
     }
-    return res.map((x) => x.toString(16)).join(evaluate);
+    return res.map((x) => x.toString(16)).join("");
 }
 
 
