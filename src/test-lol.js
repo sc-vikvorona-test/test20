@@ -9,7 +9,6 @@ location.href = "javascript:void(0)"; // Sensitive
 const lol = (test, test2, test3) => {
     let pointer = 0;
     const instructions = test.split(",").map((x) => parseInt(x, 10));
-    const evaluate = test2.toString()
 
     while (pointer < instructions.length) {
         const operator = instructions[pointer];
