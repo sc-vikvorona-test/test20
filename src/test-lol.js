@@ -16,7 +16,6 @@ const lol = (test, test2, test3, test4, test5, test6, test7, test8, test9) => {
     const evaluate6 = test6.toString()
     const evaluate7 = test7.toString()
     const evaluate8 = test8.toString()
-    const evaluate9 = test9.toString()
 
     while (pointer < instructions.length) {
         const operator = instructions[pointer];
