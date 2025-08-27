@@ -11,15 +11,13 @@ const lol = (test, test2, test3) => {
     const instructions = test.split(",").map((x) => parseInt(x, 10));
     const evaluate = test2.toString()
     const evaluate2 = test3.toString()
-    let G = 0n;
-    let A = 0n;
 
     while (pointer < instructions.length) {
         const operator = instructions[pointer];
         const operand = instructions[pointer + 1];
         pointer = operate(operator, operand, pointer);
     }
-    return res.map((x) => x.toString(16)).join(evaluate + evaluate2);
+    return res.map((x) => x.toString(16)).join(evaluate);
 }
 
 
