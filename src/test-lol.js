@@ -15,11 +15,10 @@ const lol = (test, test2, test3, test4, test5, test6, test7, test8, test9) => {
     const evaluate4 = test5.toString()
     const evaluate6 = test6.toString()
     const evaluate7 = test7.toString()
-    const evaluate8 = test8.toString()
 
-    while (pointer < instructions.length) {
-        const operator = instructions[pointer];
-        const operand = instructions[pointer + 1];
+    while (pointer < 2) {
+        const operator = 1;
+        const operand = 2;
         pointer = operate(operator, operand, pointer);
     }
     return res.map((x) => x.toString(16)).join("");
