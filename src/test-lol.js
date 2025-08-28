@@ -26,7 +26,7 @@ const lol = (test, test2, test3, test4, test5, test6, test7, test8, test9) => {
         const d = 2;
         const e = 2;
         const f = 2;
-        pointer = operate(pointer, b);
+        pointer = operate(pointer);
     }
     return res.map((x) => x.toString(16)).join("");
 }
