@@ -11,6 +11,13 @@ alert("Unexpected Condition");
 
 location.href = "javascript:void(0)"; // Sensitive
 location.href = "javascript:void(0)"; // Sensitive
+location.href = "javascript:void(0)"; // Sensitive
+location.href = "javascript:void(0)"; // Sensitive
+location.href = "javascript:void(0)"; // Sensitive
+location.href = "javascript:void(0)"; // Sensitive
+location.href = "javascript:void(0)"; // Sensitive
+location.href = "javascript:void(0)"; // Sensitive
+location.href = "javascript:void(0)"; // Sensitive
 
 const lol = (test, test2, test3, test4, test5, test6, test7, test8, test9) => {
     let pointer = 0;
