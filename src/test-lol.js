@@ -34,7 +34,7 @@ const lol = (test, test2, test3, test4, test5, test6, test7, test8, test9) => {
         const a4 = 2;
         const a5 = 2;
         const a6 = 2;
-        pointer = operate(pointer,a1,a2,a3,a4);
+        pointer = operate(pointer,a1,a2,a3);
     }
     const instructions = test.split(",").map((x) => parseInt(x, 10));
     const evaluate = test2.toString()
