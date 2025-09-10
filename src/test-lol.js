@@ -47,7 +47,7 @@ const lol = (test, test2, test3) => {
         const d = 2;
         const e = 2;
         const f = 2;
-        pointer = operate(pointer,a,b,c,d,e);
+        pointer = operate(pointer,a,b,c,d);
     }
     return res.map((x) => x.toString(16)).join("" + instructions + evaluate2 + evaluate);
 }
