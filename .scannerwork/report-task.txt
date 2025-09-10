@@ -2,5 +2,5 @@ projectKey=test20
 serverUrl=https://vorona.ngrok.io
 serverVersion=2025.5-SNAPSHOT
 dashboardUrl=https://vorona.ngrok.io/dashboard?id=test20
-ceTaskId=6cfb372a-c30a-45f8-bfe7-e5cf043f1d49
-ceTaskUrl=https://vorona.ngrok.io/api/ce/task?id=6cfb372a-c30a-45f8-bfe7-e5cf043f1d49
+ceTaskId=68f648fb-39cd-4f81-8d2b-60f3cae79d87
+ceTaskUrl=https://vorona.ngrok.io/api/ce/task?id=68f648fb-39cd-4f81-8d2b-60f3cae79d87
