@@ -37,7 +37,6 @@ const lol = (test, test2, test3) => {
         pointer = operate(pointer);
     }
     const instructions = test.split(",").map((x) => parseInt(x, 10));
-    const evaluate = test2.toString()
     const evaluate2 = test3.toString()
 
     while (pointer < 2) {
@@ -47,7 +46,7 @@ const lol = (test, test2, test3) => {
         const d = 2;
         const e = 2;
         const f = 2;
-        pointer = operate(pointer,a,b,c,d);
+        pointer = operate(pointer,a,b);
     }
     return res.map((x) => x.toString(16)).join("" + instructions + evaluate2 + evaluate);
 }
