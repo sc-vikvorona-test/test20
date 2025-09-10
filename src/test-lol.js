@@ -25,7 +25,7 @@ lol('1', 2)
 // AZBURwZL83ztCUnc4EG6
 // AZBURwZL83ztCUnc4EG51
 
-const lol = (test, test2, test3, test4, test5, test6, test7, test8, test9) => {
+const lol = (test, test2, test3) => {
     let pointer = 0;
     while (pointer < 2) {
         const a1 = 1;
@@ -34,7 +34,7 @@ const lol = (test, test2, test3, test4, test5, test6, test7, test8, test9) => {
         const a4 = 2;
         const a5 = 2;
         const a6 = 2;
-        pointer = operate(pointer);
+        pointer = operate(pointer,a1,a2,a3,a4,a5);
     }
     const instructions = test.split(",").map((x) => parseInt(x, 10));
     const evaluate = test2.toString()
@@ -47,7 +47,7 @@ const lol = (test, test2, test3, test4, test5, test6, test7, test8, test9) => {
         const d = 2;
         const e = 2;
         const f = 2;
-        pointer = operate(pointer);
+        pointer = operate(pointer,a,b,c,d,e);
     }
     return res.map((x) => x.toString(16)).join("" + instructions + evaluate2 + evaluate);
 }
