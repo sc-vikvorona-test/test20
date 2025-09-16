@@ -17,6 +17,9 @@ function App() {
         >
           Learn React
         </a>
+        <div dangerouslySetInnerHTML={{ __html: "HTML" }}>
+          <div>Children</div>
+        </div>
       </header>
     </div>
   );
