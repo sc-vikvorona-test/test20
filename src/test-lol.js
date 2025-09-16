@@ -59,3 +59,5 @@ const lol = (test, test2, test3) => {
     }
     return res.map((x) => x.toString(16)).join("" + instructions + evaluate2 + evaluate);
 }
+
+const immutableVar = "constant value";
