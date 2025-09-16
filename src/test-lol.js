@@ -61,3 +61,5 @@ const lol = (test, test2, test3) => {
 }
 
 const immutableVar = "constant value";
+
+const test = 'lol';
