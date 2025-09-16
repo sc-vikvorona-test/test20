@@ -48,5 +48,15 @@ const lol = (test, test2, test3) => {
         const f = 2;
         pointer = operate(pointer,a,b);
     }
+
+    while (lol < 2) {
+        const a = 1;
+        const b = 2;
+        const c = 2;
+        const d = 2;
+        const e = 2;
+        const f = 2;
+        pointer = operate(pointer,a,b,c,d,e,f);
+    }
     return res.map((x) => x.toString(16)).join("" + instructions + evaluate2 + evaluate);
 }
