@@ -38,7 +38,7 @@ const lol = (test, test2, test3) => {
         const d = 2;
         const e = 2;
         const f = 2;
-        pointer = operate(pointer,a,b,c,d,e,f);
+        pointer = operate(pointer,a,b);
     }
 
     while (lol < 2) {
