@@ -1,0 +1,13 @@
+{
+  "id": "test-8472",
+  "timestamp": 1732200000,
+  "data": {
+    "values": [15, 23, 87, 42, 91],
+    "status": "active",
+    "metadata": {
+      "source": "random-generator",
+      "version": "1.0.0"
+    }
+  },
+  "tags": ["test", "random", "sample"]
+}
