@@ -1,0 +1,20 @@
+{
+  "users": [
+    {
+      "id": 101,
+      "username": "testuser1",
+      "active": true
+    },
+    {
+      "id": 102,
+      "username": "testuser2",
+      "active": false
+    }
+  ],
+  "metadata": {
+    "generated": "2025-11-21",
+    "type": "mock",
+    "count": 2,
+    "test": "test"
+  }
+}

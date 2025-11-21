@@ -1,0 +1,17 @@
+NODE_ENV=development
+PORT=3000
+HOST=localhost
+
+API_KEY=test_key_abc123xyz789
+API_URL=https://api.example.com/v1
+
+DATABASE_HOST=localhost
+DATABASE_PORT=5432
+DATABASE_NAME=test_db
+
+ENABLE_LOGGING=true
+LOG_LEVEL=debug
+MAX_CONNECTIONS=50
+
+CACHE_TTL=3600
+TIMEOUT_MS=5000
