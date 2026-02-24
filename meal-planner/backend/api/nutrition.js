@@ -9,6 +9,17 @@ router.use(auth);
 
 const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
+const DAILY_TARGETS = {
+  calories: 2000,
+  protein: 50,
+  carbs: 275,
+  fat: 78,
+};
+
+router.get('/targets', async (req, res) => {
+  res.json(DAILY_TARGETS);
+});
+
 router.get('/week', async (req, res) => {
   try {
     const { weekStart } = req.query;
@@ -42,10 +53,15 @@ router.get('/week', async (req, res) => {
         }
       }
 
+      const percentOfTarget = DAILY_TARGETS.calories > 0
+        ? Math.round((dayTotals.calories / DAILY_TARGETS.calories) * 100)
+        : 0;
+
       daily.push({
         dayOfWeek: day.dayOfWeek,
         dayName: DAY_NAMES[day.dayOfWeek],
         ...dayTotals,
+        percentOfTarget,
       });
 
       weekly.calories += dayTotals.calories;

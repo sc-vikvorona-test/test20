@@ -1,18 +1,23 @@
 import { BrowserRouter, Routes, Route, Link, useNavigate } from 'react-router-dom';
-import { useState, useEffect, createContext, useContext } from 'react';
+import { useState, useEffect } from 'react';
 import Home from './pages/Home.jsx';
 import RecipeList from './pages/RecipeList.jsx';
 import RecipeDetail from './pages/RecipeDetail.jsx';
 import MealPlanner from './pages/MealPlanner.jsx';
 import ShoppingList from './pages/ShoppingList.jsx';
+import CreateRecipe from './pages/CreateRecipe.jsx';
+import EditRecipe from './pages/EditRecipe.jsx';
+import UserProfile from './pages/UserProfile.jsx';
 import AuthModal from './components/AuthModal.jsx';
 import { useStore } from './store/index.js';
 import { getMe } from './services/api.js';
+import { createContext } from 'react';
 
 export const AuthContext = createContext(null);
 
 const Navbar = () => {
   const { user, token, logout } = useStore();
+  const navigate = useNavigate();
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState('login');
 
@@ -50,7 +55,6 @@ const Navbar = () => {
     borderRadius: '6px',
     fontSize: '14px',
     fontWeight: '500',
-    transition: 'background-color 0.2s',
   };
 
   const btnStyle = {
@@ -74,6 +78,19 @@ const Navbar = () => {
     cursor: 'pointer',
   };
 
+  const createBtnStyle = {
+    backgroundColor: '#F4A261',
+    color: '#fff',
+    border: 'none',
+    padding: '8px 14px',
+    borderRadius: '6px',
+    fontSize: '13px',
+    fontWeight: '600',
+    cursor: 'pointer',
+    textDecoration: 'none',
+    display: 'inline-block',
+  };
+
   return (
     <>
       <nav style={navStyle}>
@@ -82,9 +99,14 @@ const Navbar = () => {
           <Link to="/recipes" style={linkStyle}>Recipes</Link>
           {token && <Link to="/planner" style={linkStyle}>Meal Planner</Link>}
           {token && <Link to="/shopping" style={linkStyle}>Shopping</Link>}
+          {token && (
+            <Link to="/recipes/create" style={createBtnStyle}>+ Create Recipe</Link>
+          )}
           {token ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <span style={{ color: '#FEFAE0', fontSize: '14px' }}>Hi, {user?.name?.split(' ')[0]}</span>
+              <Link to="/profile" style={{ ...linkStyle, fontWeight: '600' }}>
+                {user?.name?.split(' ')[0]}
+              </Link>
               <button style={logoutBtnStyle} onClick={logout}>Logout</button>
             </div>
           ) : (
@@ -101,11 +123,16 @@ const Navbar = () => {
 };
 
 const AuthProvider = ({ children }) => {
-  const { token, setUser } = useStore();
+  const { token, setUser, setFavorites } = useStore();
 
   useEffect(() => {
     if (token) {
-      getMe().then((res) => setUser(res.data)).catch(() => {});
+      getMe().then((res) => {
+        setUser(res.data);
+        if (res.data.favorites) {
+          setFavorites(res.data.favorites.map((f) => (typeof f === 'string' ? f : f._id)));
+        }
+      }).catch(() => {});
     }
   }, [token]);
 
@@ -121,9 +148,12 @@ const App = () => {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/recipes" element={<RecipeList />} />
+            <Route path="/recipes/create" element={<CreateRecipe />} />
+            <Route path="/recipes/:id/edit" element={<EditRecipe />} />
             <Route path="/recipes/:id" element={<RecipeDetail />} />
             <Route path="/planner" element={<MealPlanner />} />
             <Route path="/shopping" element={<ShoppingList />} />
+            <Route path="/profile" element={<UserProfile />} />
           </Routes>
         </div>
       </AuthProvider>

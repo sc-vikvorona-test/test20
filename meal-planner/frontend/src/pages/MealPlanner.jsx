@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store/index.js';
 import { getMealPlan, updateMealPlan, getWeekNutrition, getRecipes } from '../services/api.js';
 import WeeklyCalendar from '../components/WeeklyCalendar.jsx';
+import NutritionBar from '../components/NutritionBar.jsx';
 
 const getWeekStart = (date) => {
   const d = new Date(date);
@@ -17,6 +18,8 @@ const formatDate = (date) => {
   return new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 };
 
+const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
 const MealPlanner = () => {
   const navigate = useNavigate();
   const { token, weekPlan, setWeekPlan, currentWeek, setCurrentWeek } = useStore();
@@ -27,6 +30,7 @@ const MealPlanner = () => {
   const [availableRecipes, setAvailableRecipes] = useState([]);
   const [recipeSearch, setRecipeSearch] = useState('');
   const [saving, setSaving] = useState(false);
+  const [showNutritionReport, setShowNutritionReport] = useState(false);
 
   useEffect(() => {
     if (!token) {
@@ -165,6 +169,37 @@ const MealPlanner = () => {
     }
   };
 
+  const handleCopyPreviousWeek = async () => {
+    const prevWeekDate = new Date(currentWeek);
+    prevWeekDate.setDate(prevWeekDate.getDate() - 7);
+    const prevWeekStr = prevWeekDate.toISOString().split('T')[0];
+    setSaving(true);
+    try {
+      const prevRes = await getMealPlan(prevWeekStr);
+      if (!prevRes.data || !prevRes.data.days || prevRes.data.days.length === 0) {
+        setSaving(false);
+        return;
+      }
+      const weekStartStr = currentWeek.toISOString().split('T')[0];
+      const copiedDays = prevRes.data.days.map((d) => ({
+        dayOfWeek: d.dayOfWeek,
+        meals: {
+          breakfast: d.meals.breakfast?._id || d.meals.breakfast || null,
+          lunch: d.meals.lunch?._id || d.meals.lunch || null,
+          dinner: d.meals.dinner?._id || d.meals.dinner || null,
+          snacks: (d.meals.snacks || []).map((s) => s._id || s),
+        },
+      }));
+      const saveRes = await updateMealPlan({ weekStart: weekStartStr, days: copiedDays });
+      setWeekPlan(saveRes.data);
+      const nutrRes = await getWeekNutrition(weekStartStr);
+      setNutrition(nutrRes.data);
+    } catch {
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const goToPrevWeek = () => {
     const prev = new Date(currentWeek);
     prev.setDate(prev.getDate() - 7);
@@ -177,19 +212,14 @@ const MealPlanner = () => {
     setCurrentWeek(getWeekStart(next));
   };
 
+  const hasMeals = weekPlan?.days?.some((d) =>
+    d.meals.breakfast || d.meals.lunch || d.meals.dinner || (d.meals.snacks?.length > 0)
+  );
+
   const containerStyle = {
     maxWidth: '1200px',
     margin: '0 auto',
     padding: '40px 24px',
-  };
-
-  const headerStyle = {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: '32px',
-    flexWrap: 'wrap',
-    gap: '16px',
   };
 
   const navBtnStyle = {
@@ -208,6 +238,7 @@ const MealPlanner = () => {
     alignItems: 'center',
     gap: '16px',
     marginBottom: '24px',
+    flexWrap: 'wrap',
   };
 
   const weekLabelStyle = {
@@ -218,7 +249,7 @@ const MealPlanner = () => {
     textAlign: 'center',
   };
 
-  const nutritionCardStyle = {
+  const nutritionSummaryStyle = {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
     gap: '16px',
@@ -226,7 +257,7 @@ const MealPlanner = () => {
     backgroundColor: '#fff',
     borderRadius: '12px',
     boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
-    marginBottom: '28px',
+    marginBottom: '24px',
   };
 
   const nutrItemStyle = {
@@ -267,14 +298,35 @@ const MealPlanner = () => {
     transition: 'background-color 0.15s',
   };
 
+  const reportToggleBtnStyle = {
+    backgroundColor: showNutritionReport ? '#2D6A4F' : '#fff',
+    color: showNutritionReport ? '#FEFAE0' : '#374151',
+    border: '1px solid #D1D5DB',
+    padding: '8px 16px',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    fontSize: '13px',
+    fontWeight: '500',
+    marginBottom: '16px',
+  };
+
   return (
     <div style={containerStyle}>
-      <div style={headerStyle}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
         <div>
           <h1 style={{ fontSize: '32px', fontWeight: '700', color: '#2D6A4F', margin: '0 0 8px 0' }}>Meal Planner</h1>
           <p style={{ color: '#6B7280', margin: 0 }}>Plan your meals for the week ahead</p>
         </div>
-        <button style={{ ...navBtnStyle, backgroundColor: '#2D6A4F', color: '#FEFAE0', borderColor: '#2D6A4F' }} onClick={() => navigate('/shopping')}>View Shopping List →</button>
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+          <button
+            style={{ ...navBtnStyle, backgroundColor: '#FFF7ED', color: '#C2410C', borderColor: '#FED7AA' }}
+            onClick={handleCopyPreviousWeek}
+            disabled={saving}
+          >
+            {saving ? 'Saving...' : '📋 Copy Previous Week'}
+          </button>
+          <button style={{ ...navBtnStyle, backgroundColor: '#2D6A4F', color: '#FEFAE0', borderColor: '#2D6A4F' }} onClick={() => navigate('/shopping')}>View Shopping List →</button>
+        </div>
       </div>
 
       <div style={weekNavStyle}>
@@ -284,34 +336,97 @@ const MealPlanner = () => {
       </div>
 
       {nutrition?.weekly && (
-        <div style={nutritionCardStyle}>
+        <div style={nutritionSummaryStyle}>
           <div style={nutrItemStyle}>
-            <div style={{ fontSize: '11px', color: '#9CA3AF', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>Weekly Calories</div>
-            <div style={{ fontSize: '24px', fontWeight: '700', color: '#F97316' }}>{Math.round(nutrition.weekly.calories)}</div>
+            <div style={{ fontSize: '10px', color: '#9CA3AF', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>Weekly Cal</div>
+            <div style={{ fontSize: '22px', fontWeight: '700', color: '#F97316' }}>{Math.round(nutrition.weekly.calories)}</div>
           </div>
           <div style={nutrItemStyle}>
-            <div style={{ fontSize: '11px', color: '#9CA3AF', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>Protein</div>
-            <div style={{ fontSize: '24px', fontWeight: '700', color: '#3B82F6' }}>{Math.round(nutrition.weekly.protein)}g</div>
+            <div style={{ fontSize: '10px', color: '#9CA3AF', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>Protein</div>
+            <div style={{ fontSize: '22px', fontWeight: '700', color: '#3B82F6' }}>{Math.round(nutrition.weekly.protein)}g</div>
           </div>
           <div style={nutrItemStyle}>
-            <div style={{ fontSize: '11px', color: '#9CA3AF', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>Carbs</div>
-            <div style={{ fontSize: '24px', fontWeight: '700', color: '#F59E0B' }}>{Math.round(nutrition.weekly.carbs)}g</div>
+            <div style={{ fontSize: '10px', color: '#9CA3AF', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>Carbs</div>
+            <div style={{ fontSize: '22px', fontWeight: '700', color: '#F59E0B' }}>{Math.round(nutrition.weekly.carbs)}g</div>
           </div>
           <div style={nutrItemStyle}>
-            <div style={{ fontSize: '11px', color: '#9CA3AF', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>Fat</div>
-            <div style={{ fontSize: '24px', fontWeight: '700', color: '#EF4444' }}>{Math.round(nutrition.weekly.fat)}g</div>
+            <div style={{ fontSize: '10px', color: '#9CA3AF', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>Fat</div>
+            <div style={{ fontSize: '22px', fontWeight: '700', color: '#EF4444' }}>{Math.round(nutrition.weekly.fat)}g</div>
           </div>
           <div style={nutrItemStyle}>
-            <div style={{ fontSize: '11px', color: '#9CA3AF', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>Daily Avg Cal</div>
-            <div style={{ fontSize: '24px', fontWeight: '700', color: '#2D6A4F' }}>{Math.round(nutrition.weekly.calories / 7)}</div>
+            <div style={{ fontSize: '10px', color: '#9CA3AF', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>Daily Avg</div>
+            <div style={{ fontSize: '22px', fontWeight: '700', color: '#2D6A4F' }}>{Math.round(nutrition.weekly.calories / 7)} kcal</div>
           </div>
         </div>
       )}
 
       {loading ? (
         <div style={{ display: 'flex', justifyContent: 'center', padding: '60px', fontSize: '48px' }}>⏳</div>
-      ) : (
+      ) : !hasMeals ? (
+        <div style={{ textAlign: 'center', padding: '60px 24px', backgroundColor: '#fff', borderRadius: '16px', boxShadow: '0 1px 4px rgba(0,0,0,0.06)', marginBottom: '24px' }}>
+          <div style={{ fontSize: '60px', marginBottom: '16px' }}>📅</div>
+          <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#1F2937', marginBottom: '8px' }}>No meals planned this week</h3>
+          <p style={{ color: '#6B7280', marginBottom: '24px', fontSize: '15px' }}>Start building your meal plan by clicking the + buttons below, or copy from last week.</p>
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <button
+              style={{ backgroundColor: '#2D6A4F', color: '#FEFAE0', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', fontSize: '14px' }}
+              onClick={() => navigate('/recipes')}
+            >
+              Browse Recipes
+            </button>
+            <button
+              style={{ backgroundColor: '#FFF7ED', color: '#C2410C', border: '1px solid #FED7AA', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', fontSize: '14px' }}
+              onClick={handleCopyPreviousWeek}
+              disabled={saving}
+            >
+              Copy Previous Week
+            </button>
+          </div>
+        </div>
+      ) : null}
+
+      {!loading && (
         <WeeklyCalendar weekPlan={weekPlan} onAddMeal={handleAddMeal} onRemoveMeal={handleRemoveMeal} />
+      )}
+
+      {nutrition?.daily && nutrition.daily.length > 0 && (
+        <div style={{ marginTop: '28px' }}>
+          <button style={reportToggleBtnStyle} onClick={() => setShowNutritionReport(!showNutritionReport)}>
+            {showNutritionReport ? '▼' : '▶'} Weekly Nutrition Report
+          </button>
+
+          {showNutritionReport && (
+            <div style={{ backgroundColor: '#fff', borderRadius: '12px', padding: '24px', boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}>
+              <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#1F2937', marginBottom: '20px' }}>Daily Nutrition Breakdown</h3>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+                {nutrition.daily.map((day) => (
+                  <div key={day.dayOfWeek} style={{ backgroundColor: '#F9FAFB', borderRadius: '10px', padding: '16px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px', alignItems: 'center' }}>
+                      <span style={{ fontWeight: '700', color: '#1F2937', fontSize: '15px' }}>{day.dayName}</span>
+                      {day.percentOfTarget > 0 && (
+                        <span style={{
+                          fontSize: '12px',
+                          fontWeight: '600',
+                          backgroundColor: day.percentOfTarget >= 100 ? '#FEE2E2' : '#D1FAE5',
+                          color: day.percentOfTarget >= 100 ? '#DC2626' : '#065F46',
+                          padding: '2px 8px',
+                          borderRadius: '10px',
+                        }}>
+                          {day.percentOfTarget}% of target
+                        </span>
+                      )}
+                    </div>
+                    {day.calories > 0 ? (
+                      <NutritionBar nutrition={{ calories: day.calories, protein: day.protein, carbs: day.carbs, fat: day.fat }} />
+                    ) : (
+                      <p style={{ color: '#9CA3AF', fontSize: '13px', textAlign: 'center', padding: '16px 0', margin: 0 }}>No meals planned</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       )}
 
       {showRecipePicker && (

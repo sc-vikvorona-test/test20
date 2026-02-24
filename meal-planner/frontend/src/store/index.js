@@ -18,7 +18,7 @@ export const useStore = create((set) => ({
   },
   logout: () => {
     localStorage.removeItem('token');
-    set({ user: null, token: null });
+    set({ user: null, token: null, favorites: [] });
   },
   setUser: (user) => set({ user }),
 
@@ -36,4 +36,26 @@ export const useStore = create((set) => ({
 
   shoppingItems: {},
   setShoppingItems: (items) => set({ shoppingItems: items }),
+
+  favorites: [],
+  setFavorites: (favorites) => set({ favorites }),
+  toggleFavoriteLocal: (recipeId) =>
+    set((state) => {
+      const isFav = state.favorites.includes(recipeId);
+      return {
+        favorites: isFav
+          ? state.favorites.filter((id) => id !== recipeId)
+          : [...state.favorites, recipeId],
+      };
+    }),
+
+  notifications: [],
+  addNotification: (notification) =>
+    set((state) => ({
+      notifications: [...state.notifications, { id: Date.now(), ...notification }],
+    })),
+  removeNotification: (id) =>
+    set((state) => ({
+      notifications: state.notifications.filter((n) => n.id !== id),
+    })),
 }));

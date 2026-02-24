@@ -17,6 +17,8 @@ const INGREDIENT_CATEGORIES = {
   beverages: ['juice', 'wine', 'beer', 'water', 'soda'],
 };
 
+const customItemsStore = new Map();
+
 const categorizeIngredient = (name) => {
   const lowerName = name.toLowerCase();
   for (const [category, keywords] of Object.entries(INGREDIENT_CATEGORIES)) {
@@ -83,10 +85,47 @@ router.get('/generate', async (req, res) => {
       });
     }
 
+    for (const category of Object.keys(categorized)) {
+      categorized[category].sort((a, b) => a.name.localeCompare(b.name));
+    }
+
     res.json({
       categories: categorized,
       total: Object.values(aggregated).length,
     });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+router.post('/custom', async (req, res) => {
+  try {
+    const { weekStart, items } = req.body;
+    if (!weekStart || !items) {
+      return res.status(400).json({ message: 'weekStart and items are required' });
+    }
+
+    const key = `${req.user._id}-${weekStart}`;
+    const existing = customItemsStore.get(key) || [];
+    const updated = [...existing, ...items];
+    customItemsStore.set(key, updated);
+
+    res.status(201).json({ items: updated });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+router.get('/custom', async (req, res) => {
+  try {
+    const { weekStart } = req.query;
+    if (!weekStart) {
+      return res.status(400).json({ message: 'weekStart parameter is required' });
+    }
+
+    const key = `${req.user._id}-${weekStart}`;
+    const items = customItemsStore.get(key) || [];
+    res.json({ items });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
