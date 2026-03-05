@@ -4,6 +4,7 @@ import { getRecipe, rateRecipe, toggleFavorite, duplicateRecipe } from '../servi
 import IngredientList from '../components/IngredientList.jsx';
 import NutritionBar from '../components/NutritionBar.jsx';
 import RatingStars from '../components/RatingStars.jsx';
+import CommentSection from '../components/CommentSection.jsx';
 import { useStore } from '../store/index.js';
 
 const CUISINE_GRADIENTS = {
@@ -498,6 +499,8 @@ const RecipeDetail = () => {
           + Add to Meal Planner
         </button>
       )}
+
+      <CommentSection recipeId={recipe._id} recipeAuthorId={recipe.author?._id} />
     </div>
   );
 };

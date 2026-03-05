@@ -4,6 +4,7 @@ import { useStore } from '../store/index.js';
 import { getMealPlan, updateMealPlan, getWeekNutrition, getRecipes } from '../services/api.js';
 import WeeklyCalendar from '../components/WeeklyCalendar.jsx';
 import NutritionBar from '../components/NutritionBar.jsx';
+import TemplateManager from '../components/TemplateManager.jsx';
 
 const getWeekStart = (date) => {
   const d = new Date(date);
@@ -198,6 +199,10 @@ const MealPlanner = () => {
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleApplyTemplate = async () => {
+    await fetchMealPlan();
   };
 
   const goToPrevWeek = () => {
@@ -428,6 +433,8 @@ const MealPlanner = () => {
           )}
         </div>
       )}
+
+      <TemplateManager currentWeekStart={currentWeek} onApplyTemplate={handleApplyTemplate} />
 
       {showRecipePicker && (
         <div style={overlayStyle} onClick={() => setShowRecipePicker(false)}>

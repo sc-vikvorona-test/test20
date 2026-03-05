@@ -7,6 +7,9 @@ import recipeRoutes from './api/recipes.js';
 import mealPlanRoutes from './api/mealplans.js';
 import shoppingRoutes from './api/shopping.js';
 import nutritionRoutes from './api/nutrition.js';
+import collectionsRoutes from './api/collections.js';
+import commentsRoutes from './api/comments.js';
+import templateRoutes from './api/templates.js';
 import { errorHandler } from './middleware/errorHandler.js';
 
 dotenv.config();
@@ -33,6 +36,9 @@ app.use('/api/recipes', recipeRoutes);
 app.use('/api/mealplans', mealPlanRoutes);
 app.use('/api/shopping', shoppingRoutes);
 app.use('/api/nutrition', nutritionRoutes);
+app.use('/api/collections', collectionsRoutes);
+app.use('/api/comments', commentsRoutes);
+app.use('/api/templates', templateRoutes);
 
 app.use(errorHandler);
 
