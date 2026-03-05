@@ -6,6 +6,12 @@ const ingredientSchema = new mongoose.Schema({
   unit: { type: String, required: true },
 });
 
+const ratingSchema = new mongoose.Schema({
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  value: { type: Number, required: true, min: 1, max: 5 },
+  createdAt: { type: Date, default: Date.now },
+});
+
 const recipeSchema = new mongoose.Schema({
   title: {
     type: String,
@@ -44,6 +50,19 @@ const recipeSchema = new mongoose.Schema({
     ],
     default: 'Other',
   },
+  difficulty: {
+    type: String,
+    enum: ['Easy', 'Medium', 'Hard'],
+    default: 'Medium',
+  },
+  dietary: [{
+    type: String,
+    enum: ['vegetarian', 'vegan', 'gluten-free', 'dairy-free', 'nut-free', 'low-carb', 'keto', 'paleo'],
+  }],
+  ratings: [ratingSchema],
+  averageRating: { type: Number, default: 0, min: 0, max: 5 },
+  ratingCount: { type: Number, default: 0 },
+  favoriteCount: { type: Number, default: 0 },
   tags: [{ type: String }],
   nutrition: {
     calories: { type: Number, default: 0 },
@@ -55,6 +74,8 @@ const recipeSchema = new mongoose.Schema({
   isPublic: { type: Boolean, default: true },
   createdAt: { type: Date, default: Date.now },
 });
+
+recipeSchema.index({ title: 'text', description: 'text' });
 
 const Recipe = mongoose.model('Recipe', recipeSchema);
 

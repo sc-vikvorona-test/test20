@@ -19,6 +19,19 @@ const userSchema = new mongoose.Schema({
     required: [true, 'Password is required'],
     minlength: 6,
   },
+  avatar: {
+    type: String,
+  },
+  bio: {
+    type: String,
+    trim: true,
+    maxlength: 300,
+  },
+  favorites: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Recipe',
+  }],
+  dietaryPreferences: [{ type: String }],
   createdAt: {
     type: Date,
     default: Date.now,
