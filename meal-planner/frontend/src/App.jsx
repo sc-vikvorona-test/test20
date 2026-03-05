@@ -8,6 +8,8 @@ import ShoppingList from './pages/ShoppingList.jsx';
 import CreateRecipe from './pages/CreateRecipe.jsx';
 import EditRecipe from './pages/EditRecipe.jsx';
 import UserProfile from './pages/UserProfile.jsx';
+import Collections from './pages/Collections.jsx';
+import CollectionDetail from './pages/CollectionDetail.jsx';
 import AuthModal from './components/AuthModal.jsx';
 import { useStore } from './store/index.js';
 import { getMe } from './services/api.js';
@@ -99,6 +101,7 @@ const Navbar = () => {
           <Link to="/recipes" style={linkStyle}>Recipes</Link>
           {token && <Link to="/planner" style={linkStyle}>Meal Planner</Link>}
           {token && <Link to="/shopping" style={linkStyle}>Shopping</Link>}
+          {token && <Link to="/collections" style={linkStyle}>Collections</Link>}
           {token && (
             <Link to="/recipes/create" style={createBtnStyle}>+ Create Recipe</Link>
           )}
@@ -154,6 +157,8 @@ const App = () => {
             <Route path="/planner" element={<MealPlanner />} />
             <Route path="/shopping" element={<ShoppingList />} />
             <Route path="/profile" element={<UserProfile />} />
+            <Route path="/collections" element={<Collections />} />
+            <Route path="/collections/:id" element={<CollectionDetail />} />
           </Routes>
         </div>
       </AuthProvider>
