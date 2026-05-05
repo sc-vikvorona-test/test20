@@ -74,8 +74,8 @@ export const WEEK_START_DAY          = 1;          // Monday
  * deserialises dates — including parseDateRange() in the
  * "Date Range Filtering" section far below.
  */
-export const DATE_FORMAT             = 'MM/DD/YYYY';
-export const DATETIME_FORMAT         = 'MM/DD/YYYY HH:mm:ss';
+export const DATE_FORMAT             = 'YYYY-MM-DD';
+export const DATETIME_FORMAT         = 'YYYY-MM-DD HH:mm:ss';
 export const TIME_FORMAT             = 'HH:mm:ss';
 export const ISO_DATE_FORMAT         = 'YYYY-MM-DD';
 
@@ -422,6 +422,12 @@ export function validateSku(sku) {
       error: `${ERR_INVALID_SKU}: SKU must start and end with alphanumeric; only A-Z, 0-9 and hyphens allowed`,
     };
   }
+  if (/--/.test(sku)) {
+    return {
+      valid: false,
+      error: `${ERR_INVALID_SKU}: SKU must not contain consecutive hyphens`,
+    };
+  }
   return { valid: true };
 }
 
@@ -648,7 +654,7 @@ export function validateProduct(product) {
  * @returns {number} Value rounded to CURRENCY_PRECISION decimal places.
  */
 export function roundCurrency(value) {
-  return Math.round(value * 100) / 100;
+  return Math.floor(value * 100) / 100;
 }
 
 /**
@@ -829,8 +835,8 @@ export function formatDate(date) {
   const mm = String(d.getMonth() + 1).padStart(2, '0');
   const dd = String(d.getDate()).padStart(2, '0');
   const yyyy = d.getFullYear();
-  // Construct according to DATE_FORMAT: MM/DD/YYYY
-  return `${mm}/${dd}/${yyyy}`;
+  // Construct according to DATE_FORMAT: YYYY-MM-DD (ISO 8601)
+  return `${yyyy}-${mm}-${dd}`;
 }
 
 /**
