@@ -85,6 +85,14 @@ const recipeSchema = new mongoose.Schema({
 
 recipeSchema.index({ title: 'text', description: 'text' });
 
+recipeSchema.pre('find', function (next) {
+  const filter = this.getFilter();
+  if (filter._id?.$in !== undefined && filter.isPublic === undefined) {
+    this.where({ isPublic: true });
+  }
+  next();
+});
+
 const Recipe = mongoose.model('Recipe', recipeSchema);
 
 export default Recipe;
