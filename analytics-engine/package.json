@@ -1,0 +1,12 @@
+{
+  "name": "analytics-engine",
+  "version": "1.0.0",
+  "description": "Sales analytics and reporting engine",
+  "main": "analytics.js",
+  "type": "module",
+  "scripts": {
+    "start": "node analytics.js",
+    "test": "node --experimental-vm-modules node_modules/.bin/jest"
+  },
+  "dependencies": {}
+}
