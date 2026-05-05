@@ -73,6 +73,7 @@ const recipeSchema = new mongoose.Schema({
   imageUrl: { type: String },
   isPublic: { type: Boolean, default: true },
   createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
 });
 
 recipeSchema.index({ title: 'text', description: 'text' });

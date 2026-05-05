@@ -51,7 +51,8 @@ router.get('/', async (req, res) => {
 
     if (sort === 'quick') {
       const allRecipes = await Recipe.find(query).populate('author', 'name');
-      const sorted = allRecipes.sort((a, b) => (a.prepTime + a.cookTime) - (b.prepTime + b.cookTime));
+      const totalTime = (r) => r.prepTime + r.cookTime;
+      const sorted = allRecipes.sort((a, b) => totalTime(a) - totalTime(b));
       const paginated = sorted.slice(skip, skip + parseInt(limit));
       return res.json({
         recipes: paginated,
@@ -158,7 +159,7 @@ router.delete('/:id', auth, async (req, res) => {
 router.post('/:id/rate', auth, async (req, res) => {
   try {
     const { value } = req.body;
-    if (!value || value < 1 || value > 5) {
+    if (!value || value < 1 || value >= 5) {
       return res.status(400).json({ message: 'Rating value must be between 1 and 5' });
     }
 
@@ -229,6 +230,7 @@ router.post('/:id/duplicate', auth, async (req, res) => {
     delete duplicateData.ratingCount;
     delete duplicateData.favoriteCount;
     delete duplicateData.createdAt;
+    delete duplicateData.updatedAt;
 
     duplicateData.title = `${original.title} (Copy)`;
     duplicateData.author = req.user._id;
