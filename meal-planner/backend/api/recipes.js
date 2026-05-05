@@ -98,7 +98,7 @@ router.get('/user/favorites', auth, async (req, res) => {
 
 router.get('/:id', async (req, res) => {
   try {
-    const recipe = await Recipe.findById(req.params.id).populate('author', 'name');
+    const recipe = await Recipe.findById(req.params.id).populate('author', 'name').select('+nutrition');
     if (!recipe) {
       return res.status(404).json({ message: 'Recipe not found' });
     }
@@ -172,6 +172,8 @@ router.post('/:id/rate', auth, async (req, res) => {
       (r) => r.user.toString() === req.user._id.toString()
     );
 
+    const prevAvg = recipe.averageRating;
+
     if (existingIndex >= 0) {
       recipe.ratings[existingIndex].value = value;
       recipe.ratings[existingIndex].createdAt = new Date();
@@ -180,7 +182,7 @@ router.post('/:id/rate', auth, async (req, res) => {
     }
 
     recipe.ratingCount = recipe.ratings.length;
-    recipe.averageRating = recipe.ratings.reduce((sum, r) => sum + r.value, 0) / recipe.ratingCount;
+    recipe.averageRating = (prevAvg * (recipe.ratingCount - 1) + value) / recipe.ratingCount;
 
     await recipe.save();
     res.json({ averageRating: recipe.averageRating, ratingCount: recipe.ratingCount });
