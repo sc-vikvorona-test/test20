@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code Stats</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0f14;
+      --surface: #131720;
+      --surface2: #1a2030;
+      --border: #1e2840;
+      --accent: #e8774a;
+      --accent2: #5b8dee;
+      --accent3: #4ecdc4;
+      --text: #e2e8f0;
+      --muted: #64748b;
+      --muted2: #8899aa;
+      --success: #34d399;
+      --font: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 14px;
+      min-height: 100vh;
+    }
+
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 20px 32px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--surface);
+    }
+
+    header .logo {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--accent), #f4a261);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    header h1 {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -0.3px;
+    }
+
+    header .subtitle {
+      color: var(--muted);
+      font-size: 13px;
+      margin-left: auto;
+    }
+
+    .nav {
+      display: flex;
+      gap: 4px;
+      padding: 12px 32px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .nav button {
+      background: none;
+      border: 1px solid transparent;
+      color: var(--muted2);
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+
+    .nav button:hover { color: var(--text); background: var(--surface2); }
+    .nav button.active { color: var(--text); background: var(--surface2); border-color: var(--border); }
+
+    .page { display: none; }
+    .page.active { display: block; }
+
+    .container { padding: 28px 32px; max-width: 1400px; }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .stat-card .label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .stat-card .value {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -1px;
+      line-height: 1;
+    }
+
+    .stat-card .sub {
+      font-size: 12px;
+      color: var(--muted2);
+      margin-top: 6px;
+    }
+
+    .stat-card.accent .value { color: var(--accent); }
+    .stat-card.blue .value { color: var(--accent2); }
+    .stat-card.teal .value { color: var(--accent3); }
+    .stat-card.green .value { color: var(--success); }
+
+    .charts-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .chart-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .chart-card h3 {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted2);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 16px;
+    }
+
+    .chart-wrap {
+      position: relative;
+      height: 220px;
+    }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted2);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 14px;
+    }
+
+    .model-list { display: flex; flex-direction: column; gap: 10px; }
+
+    .model-item {}
+
+    .model-item .model-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+
+    .model-item .model-name {
+      font-size: 12px;
+      font-family: var(--font);
+      color: var(--text);
+    }
+
+    .model-item .model-tokens {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .model-bar {
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .model-bar-fill {
+      height: 100%;
+      border-radius: 2px;
+      background: var(--accent2);
+    }
+
+    .projects-table {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 28px;
+    }
+
+    .projects-table table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .projects-table thead tr {
+      border-bottom: 1px solid var(--border);
+    }
+
+    .projects-table th {
+      padding: 12px 16px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--muted);
+    }
+
+    .projects-table td {
+      padding: 12px 16px;
+      font-size: 13px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .projects-table tr:last-child td { border-bottom: none; }
+
+    .projects-table tr:hover td { background: var(--surface2); cursor: pointer; }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2px 7px;
+      font-size: 11px;
+      font-family: var(--font);
+      color: var(--muted2);
+    }
+
+    .num { font-variant-numeric: tabular-nums; }
+
+    .history-list {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .history-item {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .history-item:last-child { border-bottom: none; }
+
+    .history-item .time {
+      font-size: 11px;
+      color: var(--muted);
+      font-family: var(--font);
+      white-space: nowrap;
+      min-width: 140px;
+      padding-top: 2px;
+    }
+
+    .history-item .proj {
+      font-size: 11px;
+      color: var(--accent);
+      font-family: var(--font);
+      white-space: nowrap;
+      min-width: 140px;
+      padding-top: 2px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .history-item .prompt {
+      font-size: 13px;
+      color: var(--text);
+      line-height: 1.4;
+    }
+
+    .project-detail {
+      display: none;
+    }
+
+    .project-detail.open {
+      display: block;
+    }
+
+    .back-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted2);
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .back-btn:hover { color: var(--text); background: var(--surface2); }
+
+    .session-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 10px;
+    }
+
+    .session-item .session-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+
+    .session-item .session-prompt {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text);
+      flex: 1;
+      margin-right: 12px;
+    }
+
+    .session-item .session-meta {
+      font-size: 11px;
+      color: var(--muted);
+      display: flex;
+      gap: 12px;
+    }
+
+    .session-item .session-summary {
+      font-size: 12px;
+      color: var(--muted2);
+    }
+
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 200px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .heatmap {
+      display: flex;
+      gap: 3px;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .heatmap-col {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .heatmap-cell {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+      background: var(--border);
+    }
+
+    .heatmap-cell[data-level="1"] { background: #1a3a2a; }
+    .heatmap-cell[data-level="2"] { background: #1f5c35; }
+    .heatmap-cell[data-level="3"] { background: #2d8a4e; }
+    .heatmap-cell[data-level="4"] { background: var(--success); }
+
+    .heatmap-wrap {
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .heatmap-labels {
+      display: flex;
+      gap: 3px;
+      margin-bottom: 4px;
+      overflow-x: auto;
+    }
+
+    .heatmap-month-label {
+      font-size: 10px;
+      color: var(--muted);
+      min-width: 14px;
+      text-align: left;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">◆</div>
+  <h1>Claude Code Stats</h1>
+  <span class="subtitle" id="header-subtitle">Loading...</span>
+</header>
+
+<nav class="nav">
+  <button class="active" data-page="overview">Overview</button>
+  <button data-page="projects">Projects</button>
+  <button data-page="history">History</button>
+</nav>
+
+<div class="page active" id="page-overview">
+  <div class="container">
+    <div id="overview-content"><div class="loading">Loading stats...</div></div>
+  </div>
+</div>
+
+<div class="page" id="page-projects">
+  <div class="container">
+    <div id="projects-list-view">
+      <div id="projects-content"><div class="loading">Loading projects...</div></div>
+    </div>
+    <div id="project-detail-view" class="project-detail">
+      <button class="back-btn" id="back-to-projects">← Back to Projects</button>
+      <div id="project-detail-content"></div>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="page-history">
+  <div class="container">
+    <div id="history-content"><div class="loading">Loading history...</div></div>
+  </div>
+</div>
+
+<script>
+let statsData = null;
+let projectsData = null;
+let historyData = null;
+let overviewCharts = {};
+
+const pages = document.querySelectorAll('.page');
+const navBtns = document.querySelectorAll('.nav button');
+
+navBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    navBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const pageId = 'page-' + btn.dataset.page;
+    pages.forEach(p => p.classList.remove('active'));
+    document.getElementById(pageId).classList.add('active');
+    if (btn.dataset.page === 'history' && !historyData) loadHistory();
+    if (btn.dataset.page === 'projects' && !projectsData) loadProjects();
+  });
+});
+
+function fmt(n) {
+  if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + 'M';
+  if (n >= 1_000) return (n / 1_000).toFixed(1) + 'K';
+  return n.toString();
+}
+
+function fmtDate(iso) {
+  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function fmtRelative(iso) {
+  const diff = Date.now() - new Date(iso).getTime();
+  const d = Math.floor(diff / 86400000);
+  if (d === 0) return 'today';
+  if (d === 1) return 'yesterday';
+  if (d < 7) return d + 'd ago';
+  if (d < 30) return Math.floor(d / 7) + 'w ago';
+  return Math.floor(d / 30) + 'mo ago';
+}
+
+function modelShortName(id) {
+  return id
+    .replace('claude-', '')
+    .replace('-20251001', '')
+    .replace('-20250929', '')
+    .replace('-20251101', '')
+    .replace('-20260115', '')
+    .replace(/-\d{8}$/, '');
+}
+
+async function loadStats() {
+  const res = await fetch('/api/stats');
+  statsData = await res.json();
+  renderOverview();
+}
+
+async function loadProjects() {
+  const res = await fetch('/api/projects');
+  projectsData = await res.json();
+  renderProjects();
+}
+
+async function loadHistory() {
+  const res = await fetch('/api/history');
+  historyData = await res.json();
+  renderHistory();
+}
+
+function renderOverview() {
+  const d = statsData;
+  const lastDate = d.dailyActivity[d.dailyActivity.length - 1];
+  const today = new Date().toISOString().slice(0, 10);
+  const todayData = d.dailyActivity.find(x => x.date === today) || { messageCount: 0, sessionCount: 0, toolCallCount: 0 };
+
+  const activeDays = d.dailyActivity.length;
+  const daysSinceFirst = Math.floor((Date.now() - new Date(d.firstSessionDate).getTime()) / 86400000);
+
+  document.getElementById('header-subtitle').textContent =
+    `${fmt(d.totalMessages)} messages · ${d.totalSessions} sessions · since ${fmtDate(d.firstSessionDate)}`;
+
+  const totalTokens = Object.values(d.modelUsage || {}).reduce((s, m) => s + m.inputTokens + m.outputTokens, 0);
+  const totalCacheRead = Object.values(d.modelUsage || {}).reduce((s, m) => s + (m.cacheReadInputTokens || 0), 0);
+
+  document.getElementById('overview-content').innerHTML = `
+    <div class="stat-grid">
+      <div class="stat-card accent">
+        <div class="label">Total Messages</div>
+        <div class="value">${fmt(d.totalMessages)}</div>
+        <div class="sub">across all projects</div>
+      </div>
+      <div class="stat-card blue">
+        <div class="label">Sessions</div>
+        <div class="value">${d.totalSessions}</div>
+        <div class="sub">since ${fmtDate(d.firstSessionDate)}</div>
+      </div>
+      <div class="stat-card teal">
+        <div class="label">Active Days</div>
+        <div class="value">${activeDays}</div>
+        <div class="sub">out of ${daysSinceFirst} total days</div>
+      </div>
+      <div class="stat-card green">
+        <div class="label">Today</div>
+        <div class="value">${todayData.messageCount}</div>
+        <div class="sub">${todayData.sessionCount} sessions · ${todayData.toolCallCount} tool calls</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Tokens Used</div>
+        <div class="value">${fmt(totalTokens)}</div>
+        <div class="sub">${fmt(totalCacheRead)} cache read</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Longest Session</div>
+        <div class="value">${d.longestSession?.messageCount || 0}</div>
+        <div class="sub">messages · ${fmtDate(d.longestSession?.timestamp)}</div>
+      </div>
+    </div>
+
+    <div id="heatmap-section" style="margin-bottom:28px;">
+      <div class="chart-card">
+        <h3>Activity Heatmap</h3>
+        <div id="heatmap-container"></div>
+      </div>
+    </div>
+
+    <div class="charts-row">
+      <div class="chart-card">
+        <h3>Daily Messages (last 60 days)</h3>
+        <div class="chart-wrap"><canvas id="chart-daily"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>Activity by Hour</h3>
+        <div class="chart-wrap"><canvas id="chart-hours"></canvas></div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="chart-card">
+        <h3>Tool Calls vs Messages</h3>
+        <div class="chart-wrap"><canvas id="chart-tools"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>Model Usage</h3>
+        <div class="model-list" id="model-list"></div>
+      </div>
+    </div>
+  `;
+
+  renderHeatmap(d.dailyActivity);
+  renderDailyChart(d.dailyActivity);
+  renderHourChart(d.hourCounts);
+  renderToolsChart(d.dailyActivity);
+  renderModelList(d.modelUsage);
+}
+
+function renderHeatmap(activity) {
+  const byDate = {};
+  activity.forEach(d => { byDate[d.date] = d.messageCount; });
+
+  const maxVal = Math.max(...Object.values(byDate));
+  const now = new Date();
+  const start = new Date(now);
+  start.setDate(start.getDate() - 364);
+  start.setDate(start.getDate() - start.getDay());
+
+  const weeks = [];
+  let current = new Date(start);
+  while (current <= now) {
+    const week = [];
+    for (let d = 0; d < 7; d++) {
+      const dateStr = current.toISOString().slice(0, 10);
+      const count = byDate[dateStr] || 0;
+      let level = 0;
+      if (count > 0) level = count < maxVal * 0.25 ? 1 : count < maxVal * 0.5 ? 2 : count < maxVal * 0.75 ? 3 : 4;
+      week.push({ date: dateStr, count, level, future: current > now });
+      current.setDate(current.getDate() + 1);
+    }
+    weeks.push(week);
+  }
+
+  const container = document.getElementById('heatmap-container');
+  const wrap = document.createElement('div');
+  wrap.className = 'heatmap-wrap';
+
+  const heatmap = document.createElement('div');
+  heatmap.className = 'heatmap';
+
+  weeks.forEach(week => {
+    const col = document.createElement('div');
+    col.className = 'heatmap-col';
+    week.forEach(day => {
+      const cell = document.createElement('div');
+      cell.className = 'heatmap-cell';
+      if (!day.future) {
+        cell.dataset.level = day.level;
+        cell.title = `${day.date}: ${day.count} messages`;
+      }
+      col.appendChild(cell);
+    });
+    heatmap.appendChild(col);
+  });
+
+  wrap.appendChild(heatmap);
+  container.appendChild(wrap);
+}
+
+const CHART_DEFAULTS = {
+  color: '#64748b',
+  plugins: {
+    legend: { display: false },
+    tooltip: {
+      backgroundColor: '#1a2030',
+      borderColor: '#1e2840',
+      borderWidth: 1,
+      titleColor: '#e2e8f0',
+      bodyColor: '#94a3b8',
+      padding: 10,
+    }
+  },
+  scales: {
+    x: {
+      grid: { color: '#1e2840' },
+      ticks: { color: '#475569', font: { size: 11 } }
+    },
+    y: {
+      grid: { color: '#1e2840' },
+      ticks: { color: '#475569', font: { size: 11 } }
+    }
+  }
+};
+
+function renderDailyChart(activity) {
+  const recent = activity.slice(-60);
+  const ctx = document.getElementById('chart-daily').getContext('2d');
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: recent.map(d => d.date.slice(5)),
+      datasets: [{
+        data: recent.map(d => d.messageCount),
+        backgroundColor: '#5b8dee33',
+        borderColor: '#5b8dee',
+        borderWidth: 1,
+        borderRadius: 3,
+      }]
+    },
+    options: { ...CHART_DEFAULTS, responsive: true, maintainAspectRatio: false }
+  });
+}
+
+function renderHourChart(hourCounts) {
+  const hours = Array.from({ length: 24 }, (_, i) => ({
+    h: i,
+    count: hourCounts[String(i)] || 0
+  }));
+  const ctx = document.getElementById('chart-hours').getContext('2d');
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: hours.map(h => h.h + ':00'),
+      datasets: [{
+        data: hours.map(h => h.count),
+        backgroundColor: '#e8774a33',
+        borderColor: '#e8774a',
+        borderWidth: 1,
+        borderRadius: 3,
+      }]
+    },
+    options: { ...CHART_DEFAULTS, responsive: true, maintainAspectRatio: false }
+  });
+}
+
+function renderToolsChart(activity) {
+  const recent = activity.slice(-30);
+  const ctx = document.getElementById('chart-tools').getContext('2d');
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: recent.map(d => d.date.slice(5)),
+      datasets: [
+        {
+          label: 'Messages',
+          data: recent.map(d => d.messageCount),
+          borderColor: '#5b8dee',
+          backgroundColor: '#5b8dee15',
+          fill: true,
+          tension: 0.3,
+          pointRadius: 2,
+        },
+        {
+          label: 'Tool Calls',
+          data: recent.map(d => d.toolCallCount),
+          borderColor: '#e8774a',
+          backgroundColor: '#e8774a15',
+          fill: true,
+          tension: 0.3,
+          pointRadius: 2,
+        }
+      ]
+    },
+    options: {
+      ...CHART_DEFAULTS,
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        ...CHART_DEFAULTS.plugins,
+        legend: {
+          display: true,
+          labels: { color: '#94a3b8', boxWidth: 12, font: { size: 11 } }
+        }
+      }
+    }
+  });
+}
+
+function renderModelList(modelUsage) {
+  const models = Object.entries(modelUsage || {})
+    .map(([id, u]) => ({
+      name: modelShortName(id),
+      tokens: u.inputTokens + u.outputTokens,
+    }))
+    .sort((a, b) => b.tokens - a.tokens);
+
+  const max = models[0]?.tokens || 1;
+  const container = document.getElementById('model-list');
+
+  const colors = ['#5b8dee', '#e8774a', '#4ecdc4', '#f7dc6f', '#c39bd3'];
+  models.forEach((m, i) => {
+    const pct = Math.round((m.tokens / max) * 100);
+    container.innerHTML += `
+      <div class="model-item">
+        <div class="model-header">
+          <span class="model-name">${m.name}</span>
+          <span class="model-tokens">${fmt(m.tokens)} tokens</span>
+        </div>
+        <div class="model-bar">
+          <div class="model-bar-fill" style="width:${pct}%;background:${colors[i % colors.length]}"></div>
+        </div>
+      </div>
+    `;
+  });
+}
+
+function renderProjects() {
+  if (!projectsData) return;
+  const container = document.getElementById('projects-content');
+
+  const topByMessages = [...projectsData].sort((a, b) => b.totalMessages - a.totalMessages);
+
+  container.innerHTML = `
+    <div class="stat-grid" style="margin-bottom:20px">
+      <div class="stat-card accent">
+        <div class="label">Total Projects</div>
+        <div class="value">${projectsData.length}</div>
+      </div>
+      <div class="stat-card blue">
+        <div class="label">Most Active</div>
+        <div class="value" style="font-size:16px;letter-spacing:-0.5px">${topByMessages[0]?.name?.split('/').pop() || '-'}</div>
+        <div class="sub">${fmt(topByMessages[0]?.totalMessages || 0)} messages</div>
+      </div>
+    </div>
+    <div class="projects-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Project</th>
+            <th>Sessions</th>
+            <th>Messages</th>
+            <th>Last Active</th>
+            <th>First Active</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${projectsData.map(p => `
+            <tr data-project-id="${p.id}">
+              <td><strong>${p.name}</strong></td>
+              <td class="num">${p.sessionCount}</td>
+              <td class="num">${fmt(p.totalMessages)}</td>
+              <td>${p.lastActive ? fmtRelative(p.lastActive) : '-'}</td>
+              <td>${p.firstActive ? fmtDate(p.firstActive) : '-'}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+
+  container.querySelectorAll('tr[data-project-id]').forEach(row => {
+    row.addEventListener('click', () => showProjectDetail(row.dataset.projectId));
+  });
+}
+
+function showProjectDetail(projectId) {
+  const project = projectsData.find(p => p.id === projectId);
+  if (!project) return;
+
+  document.getElementById('projects-list-view').style.display = 'none';
+  const detailView = document.getElementById('project-detail-view');
+  detailView.classList.add('open');
+
+  document.getElementById('project-detail-content').innerHTML = `
+    <h2 style="font-size:20px;margin-bottom:6px">${project.name}</h2>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:24px">
+      ${project.sessionCount} sessions · ${fmt(project.totalMessages)} messages ·
+      active since ${fmtDate(project.firstActive)}
+    </p>
+    <div class="section-title">Recent Sessions</div>
+    ${project.recentSessions.map(s => `
+      <div class="session-item">
+        <div class="session-header">
+          <div class="session-prompt">${escapeHtml(s.firstPrompt || '(no prompt)')}</div>
+          <div class="session-meta">
+            <span>${s.messageCount} msgs</span>
+            <span>${fmtRelative(s.modified)}</span>
+            ${s.gitBranch ? `<span class="badge">${escapeHtml(s.gitBranch)}</span>` : ''}
+          </div>
+        </div>
+        ${s.summary ? `<div class="session-summary">${escapeHtml(s.summary)}</div>` : ''}
+      </div>
+    `).join('')}
+  `;
+}
+
+document.getElementById('back-to-projects').addEventListener('click', () => {
+  document.getElementById('projects-list-view').style.display = '';
+  document.getElementById('project-detail-view').classList.remove('open');
+});
+
+function renderHistory() {
+  const container = document.getElementById('history-content');
+  container.innerHTML = `
+    <div class="section-title" style="margin-bottom:14px">Recent Prompts</div>
+    <div class="history-list">
+      ${historyData.map(h => `
+        <div class="history-item">
+          <span class="time">${new Date(h.timestamp).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+          <span class="proj">${escapeHtml(h.project || '')}</span>
+          <span class="prompt">${escapeHtml(h.display || '')}</span>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+loadStats();
+</script>
+</body>
+</html>
