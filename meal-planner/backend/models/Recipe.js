@@ -65,17 +65,33 @@ const recipeSchema = new mongoose.Schema({
   favoriteCount: { type: Number, default: 0 },
   tags: [{ type: String }],
   nutrition: {
-    calories: { type: Number, default: 0 },
-    protein: { type: Number, default: 0 },
-    carbs: { type: Number, default: 0 },
-    fat: { type: Number, default: 0 },
+    type: new mongoose.Schema(
+      {
+        calories: { type: Number, default: 0 },
+        protein: { type: Number, default: 0 },
+        carbs: { type: Number, default: 0 },
+        fat: { type: Number, default: 0 },
+      },
+      { _id: false }
+    ),
+    select: false,
+    default: () => ({ calories: 0, protein: 0, carbs: 0, fat: 0 }),
   },
   imageUrl: { type: String },
   isPublic: { type: Boolean, default: true },
   createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
 });
 
 recipeSchema.index({ title: 'text', description: 'text' });
+
+recipeSchema.pre('find', function (next) {
+  const filter = this.getFilter();
+  if (filter._id?.$in !== undefined && filter.isPublic === undefined) {
+    this.where({ isPublic: true });
+  }
+  next();
+});
 
 const Recipe = mongoose.model('Recipe', recipeSchema);
 

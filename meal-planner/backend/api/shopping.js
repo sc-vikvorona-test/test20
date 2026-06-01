@@ -56,19 +56,28 @@ router.get('/generate', async (req, res) => {
 
     const recipes = await Recipe.find({ _id: { $in: Array.from(recipeIds) } });
 
+    const recipeMap = new Map(recipes.map((r) => [r._id.toString(), r]));
+
     const aggregated = {};
-    for (const recipe of recipes) {
-      for (const ingredient of recipe.ingredients) {
-        const key = ingredient.name.toLowerCase();
-        if (aggregated[key]) {
-          aggregated[key].amount += ingredient.amount;
-        } else {
-          aggregated[key] = {
-            name: ingredient.name,
-            amount: ingredient.amount,
-            unit: ingredient.unit,
-            category: categorizeIngredient(ingredient.name),
-          };
+    for (const day of mealPlan.days) {
+      const { breakfast, lunch, dinner, snacks } = day.meals;
+      for (const id of [breakfast, lunch, dinner, ...(snacks || [])].filter(Boolean)) {
+        const recipe = recipeMap.get(id.toString());
+        if (!recipe) continue;
+        const servings = recipe.servings || 1;
+        for (const ingredient of recipe.ingredients) {
+          const key = ingredient.name.toLowerCase();
+          const amountPerServing = ingredient.amount / servings;
+          if (aggregated[key]) {
+            aggregated[key].amount += amountPerServing;
+          } else {
+            aggregated[key] = {
+              name: ingredient.name,
+              amount: amountPerServing,
+              unit: ingredient.unit,
+              category: categorizeIngredient(ingredient.name),
+            };
+          }
         }
       }
     }
